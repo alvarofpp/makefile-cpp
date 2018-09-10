@@ -1,0 +1,69 @@
+##### Declaração de variáveis #####
+# Variáveis que indicam os diretórios
+BINDIR = bin
+SRCDIR = src
+INCLUDEDIR = include
+APPDIR = application
+OBJDIR = build
+TESTDIR = test
+
+# Variáveis que indicam o compilador e as flags usadas nos comandos
+CC = g++
+CFLAGS = -O3 -Wall -ansi -pedantic -I $(INCLUDEDIR)
+LDFLAGS =
+
+# Variáveis que indicam onde será o executável e onde está o código principal, respectivamente
+## Na configuração atual, o valor de BIN será: bin/lab00, pois usará o valor da variável BINDIR já declarada
+BIN = ${BINDIR}/lab00
+## Na configuração atual, o valor de APP será: application/lab00.cpp, pois usará o valor da variável APPDIR já declarada
+APP = ${APPDIR}/lab00.cpp
+
+# Variáveis usados no processo de geração de arquivos objetos
+## Variável que representa todos os arquivos .cpp presentes na pasta de sources (src, no caso)
+## Com o "wildcard", essa variável gerará uma lista de todos os arquivos .cpp que se encontrarem
+## na pasta presente na variável SRCDIR (no caso, 'src').
+SRC = $(wildcard $(SRCDIR)/*.cpp)
+## Gerará todos os valores de arquivos objetos usados na compilação.
+## A parte '$(SRCDIR)/%.cpp' referece aos arquivos de entrada, podendo possuir qualquer nome, desde que possuam
+## extensão .cpp e estejam na pasta correspondente da variável 'SRCDIR'.
+## A parte '$(OBJDIR)/%.o' referece aos valores arquivos de saída, possuindo o mesmo nome de entrada, 
+## porém com a extensão .o.
+## A parte '$(SRC)' acessa a variável 'SRC' que possui os valores de entrada.
+## Exemplo: se a entrada for 'src/manipulation.cpp', ele gerará na variável o valor 'biuld/manipulation.o'.
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRC))
+APPOBJ = $(patsubst $(APPDIR)/%.cpp,$(OBJDIR)/%.o,$(APP))
+
+# Variáveis de testes
+## Variável com a lista de todos os arquivos presentes, no caso, em 'test/' de extensão '.cpp'.
+_TESTS = $(wildcard $(TESTDIR)/*.cpp)
+## Variável com o nome de cada arquivo da variável '_TESTS'.
+## Exemplo: se a entrada for 'test/manipulation.cpp', ele gerará na variável o valor 'test/manipulation'.
+TESTS = $(patsubst %.cpp,%,$(_TESTS))
+
+##### Regras de compilação #####
+# Cria o executável do projeto.
+$(BIN): $(OBJS) $(APPOBJ)
+	$(CC) -o $(BIN) $(APPOBJ) $(OBJS) $(CFLAGS) $(LDFLAGS)
+
+# Compila e converte para a linguagem de máquina (sem linkar).
+# Para isso ele utiliza o nome da regra ($@) e o nome da primeira dependência ($<, no caso representa o '$(APP)').
+$(APPOBJ): $(APP)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+# Mesma coisa da regra de cima, sendo que com os arquivos presentes em 'src'.
+${OBJDIR}/%.o: $(SRCDIR)/%.cpp
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+# Realiza os testes.
+test: $(TESTS) 
+	$(info ************  Testes concluídos com sucesso! ************)
+
+# Objetos usados nos testes.
+$(TESTDIR)/t_%: $(TESTDIR)/t_%.cpp $(OBJS)
+	$(CC) -o $@ $< $(OBJS) $(CFLAGS) $(LDFLAGS)
+	$@
+
+# Apaga tudo: executável, objetos e testes (todos compilados).
+clean:
+	rm -f $(BIN) $(OBJS) $(APPOBJ)
+	rm -f $(TESTS)
