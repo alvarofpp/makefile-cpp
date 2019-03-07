@@ -9,8 +9,8 @@ CC = g++
 CFLAGS = -O3 -Wall -ansi -pedantic -std=c++11 -I $(INCLUDEDIR)
 LDFLAGS =
 
-BIN = ${BINDIR}/main
-APP = ${APPDIR}/main.cpp
+BIN = $(BINDIR)/main
+APP = $(APPDIR)/main.cpp
 
 SRC = $(wildcard $(SRCDIR)/*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRC))
@@ -25,7 +25,7 @@ $(BIN): $(OBJS) $(APPOBJ)
 $(APPOBJ): $(APP)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-${OBJDIR}/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 test: $(TESTS) 
@@ -38,3 +38,11 @@ $(TESTDIR)/t_%: $(TESTDIR)/t_%.cpp $(OBJS)
 clean:
 	rm -f $(BIN) $(OBJS) $(APPOBJ)
 	rm -f $(TESTS)
+
+init: 	
+	@mkdir -p $(BINDIR)/
+	@mkdir -p $(SRCDIR)/
+	@mkdir -p $(INCLUDEDIR)/
+	@mkdir -p $(APPDIR)/
+	@mkdir -p $(OBJDIR)/
+	@mkdir -p $(TESTDIR)/
